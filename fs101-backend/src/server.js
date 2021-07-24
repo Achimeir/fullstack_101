@@ -1,8 +1,10 @@
 import express from 'express';
 import { MongoClient } from 'mongodb';
+import path from 'path';
 
 const app = express();
 app.use(express.json());
+app.use(express.static(path.join(__dirname, '/build')));
 
 const withDB = async (operation, res) => {
     try {
@@ -13,7 +15,7 @@ const withDB = async (operation, res) => {
         client.close();
 
     } catch (error) {
-        res.status(500).json({ message: "Error connecting to the db",error });
+        res.status(500).json({ message: "Error connecting to the db", error });
     }
 };
 
@@ -58,6 +60,10 @@ app.post('/api/articles/:name/add-comment', (req, res) => {
         const updatedArticleInfo = await db.collection('articles').findOne({ name: articleName });
         res.status(200).json(updatedArticleInfo);
     }, res);
+});
+
+app.get('*', (res, req) => {
+    res.sendFile(path.join(__dirname + '/build/index.html'));
 });
 
 app.listen(8000, () => console.log('listning on port 8000'));
